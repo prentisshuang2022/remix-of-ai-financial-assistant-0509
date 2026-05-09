@@ -1,5 +1,6 @@
 import { Search, Sparkles, Link2, Upload } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 
 const result = [
   { k: "客户名称", v: "Apex Industrial Co., Ltd." },
@@ -18,9 +19,68 @@ const result = [
   { k: "付款组织", v: "总部财务" },
 ];
 
+const ANALYZER_EXAMPLES = [
+  "本月应付账款超 30 天未付的供应商 Top 10",
+  "Q2 即将到期的预付款余额",
+  "同一供应商近 90 天采购单价波动超 10%",
+  "外币应付按币种汇总当前敞口",
+];
+
+const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
+  {
+    match: ["超", "30", "未付", "Top"],
+    parsed: [
+      { label: "时间范围", value: "截至今日" },
+      { label: "条件", value: "应付账龄 > 30 天且未付" },
+      { label: "分组", value: "供应商" },
+      { label: "排序", value: "应付余额降序" },
+      { label: "限制", value: "Top 10" },
+    ],
+    columns: ["供应商", "未付单数", "应付余额", "最长账龄(天)", "对应采购组织"],
+    rows: [
+      ["宁波某某精密制造", 6, "¥1,286,400", 58, "总部采购中心"],
+      ["华东精密科技", 4, "¥862,150", 45, "总部采购中心"],
+      ["深圳光学元件", 3, "¥640,800", 41, "深圳分中心"],
+      ["苏州自动化设备", 5, "¥520,300", 39, "总部采购中心"],
+      ["上海贸易服务", 2, "¥420,000", 36, "总部采购中心"],
+      ["杭州封装测试", 3, "¥318,700", 34, "宁波制造中心"],
+      ["东莞电子材料", 4, "¥276,500", 33, "深圳分中心"],
+      ["北京软件服务", 1, "¥210,000", 32, "总部 IT" ],
+      ["广州物流", 8, "¥168,400", 31, "总部采购中心"],
+      ["合肥模组", 2, "¥142,000", 31, "宁波制造中心"],
+    ],
+    source: "金蝶 ERP · 应付单 + 供应商主数据 · 实时（共 38 户）",
+  },
+];
+
+const ANALYZER_FALLBACK: AnalyzerScenario = {
+  match: [],
+  parsed: [
+    { label: "时间范围", value: "本月" },
+    { label: "维度", value: "应付状态" },
+    { label: "聚合", value: "金额合计、单据数" },
+  ],
+  columns: ["状态", "单据数", "金额合计", "占比"],
+  rows: [
+    ["未付（账龄≤30）", 64, "¥3,820,400", "42.0%"],
+    ["未付（30-60）", 38, "¥2,108,200", "23.2%"],
+    ["未付（>60）", 12, "¥962,500", "10.6%"],
+    ["部分支付", 18, "¥1,260,800", "13.9%"],
+    ["已付", 21, "¥939,100", "10.3%"],
+  ],
+  source: "金蝶 ERP · 应付单 · 本月（共 153 笔）",
+};
 export default function Payable() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <div className="space-y-5">
+      <AIRuleAnalyzer
+        module="应付/预付"
+        examples={ANALYZER_EXAMPLES}
+        scenarios={ANALYZER_SCENARIOS}
+        fallback={ANALYZER_FALLBACK}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
       {/* Left — input */}
       <div className="lg:col-span-4 space-y-5">
         <div className="rounded-xl border border-border bg-card shadow-[var(--shadow-card)]">
@@ -114,6 +174,7 @@ export default function Payable() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

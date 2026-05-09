@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Filter, Download, Sparkles, ChevronRight, X } from "lucide-react";
 import { RiskBadge, StatusBadge } from "@/components/StatusBadge";
+import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -128,6 +129,78 @@ const DEFAULTS: Record<string, string> = {
   "处理状态": "全部",
 };
 
+const ANALYZER_EXAMPLES = [
+  "本月各部门人均餐费 Top 10",
+  "近 30 天单笔超 5000 元的差旅报销",
+  "市场部近 90 天连号发票汇总",
+  "本季度报销金额环比增长超 50% 的部门",
+];
+
+const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
+  {
+    match: ["人均", "餐费", "Top"],
+    parsed: [
+      { label: "时间范围", value: "本月（2025-04）" },
+      { label: "费用类型", value: "餐饮招待" },
+      { label: "分组", value: "部门" },
+      { label: "聚合", value: "金额合计 / 报销人数" },
+      { label: "排序", value: "人均金额降序" },
+      { label: "限制", value: "Top 10" },
+    ],
+    columns: ["部门", "报销人数", "金额合计", "人均金额", "环比"],
+    rows: [
+      ["市场部", 18, "¥86,420", "¥4,801", "+32.4%"],
+      ["销售一部", 22, "¥78,920", "¥3,587", "+8.1%"],
+      ["销售二部", 19, "¥61,250", "¥3,224", "-3.5%"],
+      ["客户成功部", 12, "¥34,860", "¥2,905", "+12.0%"],
+      ["研发中心", 28, "¥69,120", "¥2,468", "+5.2%"],
+      ["供应链", 14, "¥31,240", "¥2,232", "-1.0%"],
+      ["人力资源", 8, "¥16,400", "¥2,050", "+0.8%"],
+      ["财务部", 9, "¥17,280", "¥1,920", "+2.1%"],
+      ["IT 信息", 11, "¥18,920", "¥1,720", "-4.6%"],
+      ["行政部", 7, "¥10,640", "¥1,520", "+1.2%"],
+    ],
+    source: "金蝶 ERP · 报销单 + 部门主数据 · 本月（共 1,062 笔）",
+  },
+  {
+    match: ["差旅", "5000", "超"],
+    parsed: [
+      { label: "时间范围", value: "近 30 天" },
+      { label: "费用类型", value: "差旅费" },
+      { label: "条件", value: "单笔金额 > ¥5,000" },
+      { label: "排序", value: "金额降序" },
+    ],
+    columns: ["报销单号", "提交人", "部门", "金额", "提交日期"],
+    rows: [
+      ["BX-2025-04-1081", "周奕", "研发中心", "¥18,450", "2025-04-11"],
+      ["BX-2025-04-1077", "高翔", "销售二部", "¥6,520", "2025-04-10"],
+      ["BX-2025-04-1054", "李珂", "销售一部", "¥9,820", "2025-04-08"],
+      ["BX-2025-04-1031", "陈鹏", "市场部", "¥7,450", "2025-04-05"],
+      ["BX-2025-03-0998", "吴磊", "供应链", "¥12,680", "2025-03-29"],
+    ],
+    source: "金蝶 ERP · 报销单（费用类型=差旅） · 近 30 天（共 5 笔）",
+  },
+];
+
+const ANALYZER_FALLBACK: AnalyzerScenario = {
+  match: [],
+  parsed: [
+    { label: "时间范围", value: "近 30 天（默认）" },
+    { label: "维度", value: "部门 / 费用类型" },
+    { label: "聚合", value: "金额合计、笔数" },
+  ],
+  columns: ["维度", "笔数", "金额合计", "占比"],
+  rows: [
+    ["差旅费", 318, "¥1,302,400", "38.0%"],
+    ["业务招待", 196, "¥820,800", "24.0%"],
+    ["办公采购", 142, "¥615,600", "18.0%"],
+    ["市场费用", 88, "¥410,400", "12.0%"],
+    ["培训差补", 42, "¥171,000", "5.0%"],
+    ["其他", 26, "¥102,600", "3.0%"],
+  ],
+  source: "金蝶 ERP · 报销单 · 近 30 天（共 812 笔）",
+};
+
 export default function Expense() {
   const [filters, setFilters] = useState<Record<string, string>>(DEFAULTS);
 
@@ -138,6 +211,13 @@ export default function Expense() {
 
   return (
     <div className="space-y-5">
+      <AIRuleAnalyzer
+        module="费用报销"
+        examples={ANALYZER_EXAMPLES}
+        scenarios={ANALYZER_SCENARIOS}
+        fallback={ANALYZER_FALLBACK}
+      />
+
       {/* Filters */}
       <div className="rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap items-center gap-3">
