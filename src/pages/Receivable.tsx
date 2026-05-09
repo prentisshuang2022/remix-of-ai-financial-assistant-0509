@@ -2,6 +2,57 @@ import { Upload, Sparkles, ArrowRight } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 
+const ANALYZER_EXAMPLES = [
+  "本月应收账龄 60 天以上的客户 Top 10",
+  "近 90 天回款率低于 60% 的销售员",
+  "外币收款按币种汇总当前敞口",
+  "本季度信保理赔 / 保费比",
+];
+
+const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
+  {
+    match: ["账龄", "60", "Top"],
+    parsed: [
+      { label: "时间范围", value: "截至今日" },
+      { label: "条件", value: "应收账龄 > 60 天" },
+      { label: "分组", value: "客户" },
+      { label: "排序", value: "应收余额降序" },
+      { label: "限制", value: "Top 10" },
+    ],
+    columns: ["客户", "未收单数", "应收余额", "最长账龄(天)", "归属销售"],
+    rows: [
+      ["Apex Industrial Co., Ltd.", 4, "¥586,420", 92, "周文"],
+      ["Bright Optics GmbH", 3, "¥420,800", 86, "李珂"],
+      ["Sunrise Photonics Ltd.", 5, "¥362,150", 78, "周文"],
+      ["Helix Sensor Inc.", 2, "¥298,600", 74, "高翔"],
+      ["NovaTech AS", 3, "¥256,400", 71, "李珂"],
+      ["Polaris Trading", 1, "¥210,000", 68, "陈鹏"],
+      ["Eastern Robotics", 4, "¥186,200", 66, "高翔"],
+      ["Nordic Lasers AB", 2, "¥162,800", 64, "李珂"],
+      ["BlueWave Devices", 3, "¥142,000", 63, "周文"],
+      ["Atlas Components", 1, "¥118,500", 61, "陈鹏"],
+    ],
+    source: "金蝶 ERP · 应收单 + 客户主数据 · 实时（共 26 户）",
+  },
+];
+
+const ANALYZER_FALLBACK: AnalyzerScenario = {
+  match: [],
+  parsed: [
+    { label: "时间范围", value: "截至今日" },
+    { label: "维度", value: "账龄区间" },
+    { label: "聚合", value: "应收余额、客户数" },
+  ],
+  columns: ["账龄区间", "客户数", "应收余额", "占比"],
+  rows: [
+    ["0-30 天", 42, "¥4,820,000", "48.2%"],
+    ["30-60 天", 28, "¥2,640,000", "26.4%"],
+    ["60-90 天", 16, "¥1,280,000", "12.8%"],
+    [">90 天", 12, "¥1,260,000", "12.6%"],
+  ],
+  source: "金蝶 ERP · 应收单 · 实时（共 98 户）",
+};
+
 const entries = [
   { acct: "应收账款 — Apex Industrial", debit: "", credit: "¥86,420.00", note: "冲减客户 Apex 应收余额" },
   { acct: "财务费用 — 信保手续费", debit: "¥420.00", credit: "", note: "费率 0.486% · 平安产险" },
@@ -10,7 +61,14 @@ const entries = [
 
 export default function Receivable() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    <div className="space-y-5">
+      <AIRuleAnalyzer
+        module="应收"
+        examples={ANALYZER_EXAMPLES}
+        scenarios={ANALYZER_SCENARIOS}
+        fallback={ANALYZER_FALLBACK}
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
       {/* Left input */}
       <div className="lg:col-span-4 space-y-5">
         <div className="rounded-xl border border-border bg-card shadow-[var(--shadow-card)]">
