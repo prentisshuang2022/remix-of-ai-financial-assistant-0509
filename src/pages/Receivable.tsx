@@ -9,15 +9,21 @@ const ANALYZER_EXAMPLES = [
   "本季度信保理赔 / 保费比",
 ];
 
+const ANALYZER_FIELDS = [
+  "应收单据日期", "客户", "客户国别", "销售员", "应收金额", "已收金额",
+  "应收余额", "账龄(天)", "币种", "销售订单号", "回款日期",
+];
+
 const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
   {
     match: ["账龄", "60", "Top"],
-    parsed: [
-      { label: "时间范围", value: "截至今日" },
-      { label: "条件", value: "应收账龄 > 60 天" },
-      { label: "分组", value: "客户" },
-      { label: "排序", value: "应收余额降序" },
-      { label: "限制", value: "Top 10" },
+    rules: [
+      { id: "r1", type: "筛选", field: "账龄(天)", op: ">", value: "60" },
+      { id: "r2", type: "筛选", field: "应收余额", op: ">", value: "0" },
+      { id: "r3", type: "分组", field: "客户", op: "按", value: "客户" },
+      { id: "r4", type: "聚合", field: "应收余额", op: "合计", value: "应收余额" },
+      { id: "r5", type: "排序", field: "应收余额", op: "降序", value: "" },
+      { id: "r6", type: "限制", field: "—", op: "Top", value: "10" },
     ],
     columns: ["客户", "未收单数", "应收余额", "最长账龄(天)", "归属销售"],
     rows: [
@@ -38,10 +44,10 @@ const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
 
 const ANALYZER_FALLBACK: AnalyzerScenario = {
   match: [],
-  parsed: [
-    { label: "时间范围", value: "截至今日" },
-    { label: "维度", value: "账龄区间" },
-    { label: "聚合", value: "应收余额、客户数" },
+  rules: [
+    { id: "rf1", type: "分组", field: "账龄(天)", op: "按", value: "账龄区间" },
+    { id: "rf2", type: "聚合", field: "应收余额", op: "合计", value: "金额合计" },
+    { id: "rf3", type: "聚合", field: "客户", op: "计数", value: "客户数" },
   ],
   columns: ["账龄区间", "客户数", "应收余额", "占比"],
   rows: [

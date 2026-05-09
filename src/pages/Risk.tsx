@@ -9,14 +9,20 @@ const ANALYZER_EXAMPLES = [
   "金额异常波动 > 50% 的报销单",
 ];
 
+const ANALYZER_FIELDS = [
+  "发现时间", "风险类型", "风险等级", "处理人", "所在部门", "滞留时长(h)",
+  "来源单据", "金额", "状态",
+];
+
 const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
   {
     match: ["未处理", "4", "高风险"],
-    parsed: [
-      { label: "时间范围", value: "当前在岗" },
-      { label: "条件", value: "等级=高 且 滞留 > 4 小时" },
-      { label: "分组", value: "处理人" },
-      { label: "排序", value: "最长滞留时间降序" },
+    rules: [
+      { id: "k1", type: "筛选", field: "风险等级", op: "=", value: "高" },
+      { id: "k2", type: "筛选", field: "滞留时长(h)", op: ">", value: "4" },
+      { id: "k3", type: "分组", field: "处理人", op: "按", value: "处理人" },
+      { id: "k4", type: "聚合", field: "—", op: "计数", value: "任务数" },
+      { id: "k5", type: "排序", field: "滞留时长(h)", op: "降序", value: "" },
     ],
     columns: ["处理人", "高风险任务数", "最长滞留(h)", "平均滞留(h)", "所在部门"],
     rows: [
@@ -32,10 +38,10 @@ const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
 
 const ANALYZER_FALLBACK: AnalyzerScenario = {
   match: [],
-  parsed: [
-    { label: "时间范围", value: "近 30 天" },
-    { label: "维度", value: "风险类型 × 等级" },
-    { label: "聚合", value: "事项数" },
+  rules: [
+    { id: "kf1", type: "时间", field: "发现时间", op: "=", value: "近 30 天" },
+    { id: "kf2", type: "分组", field: "风险类型", op: "按", value: "风险类型" },
+    { id: "kf3", type: "聚合", field: "—", op: "计数", value: "事项数" },
   ],
   columns: ["风险类型", "高", "中", "低", "合计"],
   rows: [
