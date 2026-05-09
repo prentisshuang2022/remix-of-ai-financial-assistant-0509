@@ -2,6 +2,52 @@ import { AlertTriangle } from "lucide-react";
 import { RiskBadge, StatusBadge } from "@/components/StatusBadge";
 import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 
+const ANALYZER_EXAMPLES = [
+  "近 30 天同一供应商被命中重复发票的笔数",
+  "本月各业务线高风险事项分布",
+  "超 4 小时未处理的高风险任务及负责人",
+  "金额异常波动 > 50% 的报销单",
+];
+
+const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
+  {
+    match: ["未处理", "4", "高风险"],
+    parsed: [
+      { label: "时间范围", value: "当前在岗" },
+      { label: "条件", value: "等级=高 且 滞留 > 4 小时" },
+      { label: "分组", value: "处理人" },
+      { label: "排序", value: "最长滞留时间降序" },
+    ],
+    columns: ["处理人", "高风险任务数", "最长滞留(h)", "平均滞留(h)", "所在部门"],
+    rows: [
+      ["李婷婷", 6, 9.2, 6.4, "财务部"],
+      ["王芳", 4, 7.8, 5.9, "财务部"],
+      ["陈明", 3, 6.5, 5.1, "财务部"],
+      ["周文", 2, 5.4, 4.8, "应收组"],
+      ["未指派", 5, 12.3, 8.6, "—"],
+    ],
+    source: "金蝶 ERP + 风险中心 · 实时（共 23 项高风险）",
+  },
+];
+
+const ANALYZER_FALLBACK: AnalyzerScenario = {
+  match: [],
+  parsed: [
+    { label: "时间范围", value: "近 30 天" },
+    { label: "维度", value: "风险类型 × 等级" },
+    { label: "聚合", value: "事项数" },
+  ],
+  columns: ["风险类型", "高", "中", "低", "合计"],
+  rows: [
+    ["报销风险", 12, 14, 5, 31],
+    ["票据重复", 7, 3, 2, 12],
+    ["付款异常", 4, 3, 1, 8],
+    ["应收超期", 6, 8, 3, 17],
+    ["对账差异", 3, 9, 4, 16],
+  ],
+  source: "金蝶 ERP + 风险中心 · 近 30 天（共 84 项）",
+};
+
 const tabs = [
   { l: "全部", n: 84, active: true },
   { l: "报销风险", n: 31 },
@@ -23,6 +69,13 @@ const rows = [
 export default function Risk() {
   return (
     <div className="space-y-5">
+      <AIRuleAnalyzer
+        module="风险预警"
+        examples={ANALYZER_EXAMPLES}
+        scenarios={ANALYZER_SCENARIOS}
+        fallback={ANALYZER_FALLBACK}
+      />
+
       <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 flex items-start gap-3">
         <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
         <div className="flex-1 text-sm">
