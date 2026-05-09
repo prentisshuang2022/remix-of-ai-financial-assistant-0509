@@ -178,5 +178,6 @@ export default function Receivable() {
         </div>
       </div>
     </div>
+    </div>
   );
 }
