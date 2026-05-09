@@ -222,59 +222,12 @@ export const AIRuleAnalyzer = ({
 
       {!collapsed && (
         <div className="p-4 space-y-3">
-          {/* NL Input */}
-          <div className="rounded-lg border border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/30 transition-all">
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder={`用一句话描述你想分析什么，例如：${examples[0]}`}
-              rows={2}
-              className="w-full resize-none rounded-lg bg-transparent p-3 text-sm placeholder:text-muted-foreground focus:outline-none"
-            />
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3 py-2">
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Database className="h-3 w-3" />
-                数据来源：金蝶 ERP（自动取数 · 实时）
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={parseFromNL}
-                  disabled={parsing}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary transition-colors disabled:opacity-60"
-                >
-                  {parsing ? (
-                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> 解析中…</>
-                  ) : (
-                    <><Sparkles className="h-3.5 w-3.5" /> AI 解析为规则</>
-                  )}
-                </button>
-                <button
-                  onClick={run}
-                  disabled={running}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
-                >
-                  {running ? (
-                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> 取数中…</>
-                  ) : (
-                    <>取数并生成结果</>
-                  )}
-                </button>
-              </div>
+          {/* Data source */}
+          <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+            <div className="inline-flex items-center gap-1.5">
+              <Database className="h-3 w-3" />
+              数据来源：金蝶 ERP（自动取数 · 实时）
             </div>
-          </div>
-
-          {/* Examples */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-muted-foreground">试试：</span>
-            {examples.map((ex) => (
-              <button
-                key={ex}
-                onClick={() => setPrompt(ex)}
-                className="rounded-full border border-border bg-secondary/60 px-2.5 py-1 text-[11px] text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-              >
-                {ex}
-              </button>
-            ))}
           </div>
 
           {/* Current rules summary */}
@@ -285,12 +238,25 @@ export const AIRuleAnalyzer = ({
                 <span className="font-medium text-foreground">当前规则</span>
                 <span className="text-muted-foreground">· 共 {rules.length} 条</span>
               </div>
-              <button
-                onClick={() => setDrawerOpen(true)}
-                className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-[11px] hover:border-primary hover:text-primary transition-colors"
-              >
-                <Settings2 className="h-3 w-3" /> 配置规则
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setDrawerOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-[11px] hover:border-primary hover:text-primary transition-colors"
+                >
+                  <Settings2 className="h-3 w-3" /> 配置规则
+                </button>
+                <button
+                  onClick={run}
+                  disabled={running}
+                  className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+                >
+                  {running ? (
+                    <><Loader2 className="h-3 w-3 animate-spin" /> 取数中…</>
+                  ) : (
+                    <><Sparkles className="h-3 w-3" /> 取数并生成结果</>
+                  )}
+                </button>
+              </div>
             </div>
             {summary && summary.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
@@ -395,10 +361,21 @@ export const AIRuleAnalyzer = ({
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="例如：本月各部门人均餐费 Top 10"
+                placeholder={`例如：${examples[0]}`}
                 rows={2}
                 className="w-full resize-none rounded-md border border-input bg-background p-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring/40"
               />
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {examples.map((ex) => (
+                  <button
+                    key={ex}
+                    onClick={() => setPrompt(ex)}
+                    className="rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
               <button
                 onClick={parseFromNL}
                 disabled={parsing}
