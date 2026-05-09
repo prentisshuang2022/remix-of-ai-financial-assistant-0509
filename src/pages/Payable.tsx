@@ -26,15 +26,21 @@ const ANALYZER_EXAMPLES = [
   "外币应付按币种汇总当前敞口",
 ];
 
+const ANALYZER_FIELDS = [
+  "应付单据日期", "供应商", "采购组织", "结算组织", "付款组织",
+  "应付金额", "已付金额", "应付余额", "账龄(天)", "币种", "采购订单号", "入库日期",
+];
+
 const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
   {
     match: ["超", "30", "未付", "Top"],
-    parsed: [
-      { label: "时间范围", value: "截至今日" },
-      { label: "条件", value: "应付账龄 > 30 天且未付" },
-      { label: "分组", value: "供应商" },
-      { label: "排序", value: "应付余额降序" },
-      { label: "限制", value: "Top 10" },
+    rules: [
+      { id: "p1", type: "筛选", field: "账龄(天)", op: ">", value: "30" },
+      { id: "p2", type: "筛选", field: "应付余额", op: ">", value: "0" },
+      { id: "p3", type: "分组", field: "供应商", op: "按", value: "供应商" },
+      { id: "p4", type: "聚合", field: "应付余额", op: "合计", value: "应付余额" },
+      { id: "p5", type: "排序", field: "应付余额", op: "降序", value: "" },
+      { id: "p6", type: "限制", field: "—", op: "Top", value: "10" },
     ],
     columns: ["供应商", "未付单数", "应付余额", "最长账龄(天)", "对应采购组织"],
     rows: [
@@ -45,7 +51,7 @@ const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
       ["上海贸易服务", 2, "¥420,000", 36, "总部采购中心"],
       ["杭州封装测试", 3, "¥318,700", 34, "宁波制造中心"],
       ["东莞电子材料", 4, "¥276,500", 33, "深圳分中心"],
-      ["北京软件服务", 1, "¥210,000", 32, "总部 IT" ],
+      ["北京软件服务", 1, "¥210,000", 32, "总部 IT"],
       ["广州物流", 8, "¥168,400", 31, "总部采购中心"],
       ["合肥模组", 2, "¥142,000", 31, "宁波制造中心"],
     ],
@@ -55,10 +61,10 @@ const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
 
 const ANALYZER_FALLBACK: AnalyzerScenario = {
   match: [],
-  parsed: [
-    { label: "时间范围", value: "本月" },
-    { label: "维度", value: "应付状态" },
-    { label: "聚合", value: "金额合计、单据数" },
+  rules: [
+    { id: "pf1", type: "时间", field: "应付单据日期", op: "=", value: "本月" },
+    { id: "pf2", type: "分组", field: "账龄(天)", op: "按", value: "账龄区间" },
+    { id: "pf3", type: "聚合", field: "应付余额", op: "合计", value: "金额合计" },
   ],
   columns: ["状态", "单据数", "金额合计", "占比"],
   rows: [
@@ -78,6 +84,7 @@ export default function Payable() {
         examples={ANALYZER_EXAMPLES}
         scenarios={ANALYZER_SCENARIOS}
         fallback={ANALYZER_FALLBACK}
+        fieldOptions={ANALYZER_FIELDS}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">

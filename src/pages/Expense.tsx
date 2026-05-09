@@ -136,16 +136,22 @@ const ANALYZER_EXAMPLES = [
   "本季度报销金额环比增长超 50% 的部门",
 ];
 
+const ANALYZER_FIELDS = [
+  "提交日期", "部门", "提交人", "费用类型", "报销金额", "发票号", "发票数量",
+  "客户", "项目", "审批状态", "风险等级",
+];
+
 const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
   {
     match: ["人均", "餐费", "Top"],
-    parsed: [
-      { label: "时间范围", value: "本月（2025-04）" },
-      { label: "费用类型", value: "餐饮招待" },
-      { label: "分组", value: "部门" },
-      { label: "聚合", value: "金额合计 / 报销人数" },
-      { label: "排序", value: "人均金额降序" },
-      { label: "限制", value: "Top 10" },
+    rules: [
+      { id: "e1", type: "时间", field: "提交日期", op: "=", value: "本月" },
+      { id: "e2", type: "筛选", field: "费用类型", op: "=", value: "餐饮招待" },
+      { id: "e3", type: "分组", field: "部门", op: "按", value: "部门" },
+      { id: "e4", type: "聚合", field: "报销金额", op: "合计", value: "金额合计" },
+      { id: "e5", type: "聚合", field: "提交人", op: "计数", value: "报销人数" },
+      { id: "e6", type: "排序", field: "人均金额", op: "降序", value: "" },
+      { id: "e7", type: "限制", field: "—", op: "Top", value: "10" },
     ],
     columns: ["部门", "报销人数", "金额合计", "人均金额", "环比"],
     rows: [
@@ -164,11 +170,11 @@ const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
   },
   {
     match: ["差旅", "5000", "超"],
-    parsed: [
-      { label: "时间范围", value: "近 30 天" },
-      { label: "费用类型", value: "差旅费" },
-      { label: "条件", value: "单笔金额 > ¥5,000" },
-      { label: "排序", value: "金额降序" },
+    rules: [
+      { id: "e8", type: "时间", field: "提交日期", op: "=", value: "近 30 天" },
+      { id: "e9", type: "筛选", field: "费用类型", op: "=", value: "差旅费" },
+      { id: "e10", type: "筛选", field: "报销金额", op: ">", value: "5000" },
+      { id: "e11", type: "排序", field: "报销金额", op: "降序", value: "" },
     ],
     columns: ["报销单号", "提交人", "部门", "金额", "提交日期"],
     rows: [
@@ -184,10 +190,10 @@ const ANALYZER_SCENARIOS: AnalyzerScenario[] = [
 
 const ANALYZER_FALLBACK: AnalyzerScenario = {
   match: [],
-  parsed: [
-    { label: "时间范围", value: "近 30 天（默认）" },
-    { label: "维度", value: "部门 / 费用类型" },
-    { label: "聚合", value: "金额合计、笔数" },
+  rules: [
+    { id: "ef1", type: "时间", field: "提交日期", op: "=", value: "近 30 天" },
+    { id: "ef2", type: "分组", field: "费用类型", op: "按", value: "费用类型" },
+    { id: "ef3", type: "聚合", field: "报销金额", op: "合计", value: "金额合计" },
   ],
   columns: ["维度", "笔数", "金额合计", "占比"],
   rows: [
@@ -216,6 +222,7 @@ export default function Expense() {
         examples={ANALYZER_EXAMPLES}
         scenarios={ANALYZER_SCENARIOS}
         fallback={ANALYZER_FALLBACK}
+        fieldOptions={ANALYZER_FIELDS}
       />
 
       {/* Filters */}
