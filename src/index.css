@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* 财务AI员工 — 现代科技 / 轻量专业（Linear · Vercel · Stripe 风格）
+       Primary #2563EB · Tech #06B6D4 · Accent #EF4444 */
+    --background: 216 20% 98%;        /* #FAFBFC */
+    --foreground: 222 47% 11%;        /* #0F172A */
+
+    --card: 0 0% 100%;                /* #FFFFFF */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221 83% 53%;           /* #2563EB 科技蓝 */
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 221 95% 95%;
+
+    --secondary: 210 40% 96%;         /* #F1F5F9 */
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;             /* bg-soft */
+    --muted-foreground: 215 16% 47%;  /* #64748B */
+
+    --accent: 187 92% 43%;            /* #06B6D4 天青辅助 */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;         /* #EF4444 活力红 */
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;            /* #F59E0B */
+    --warning-foreground: 0 0% 100%;
+    --warning-soft: 48 100% 96%;
+
+    --success: 160 84% 39%;           /* #10B981 */
+    --success-foreground: 0 0% 100%;
+    --success-soft: 152 76% 95%;
+
+    --info: 187 92% 43%;              /* 同 tech 天青 */
+    --info-foreground: 0 0% 100%;
+    --info-soft: 187 90% 95%;
+
+    --risk-high: 0 84% 60%;
+    --risk-mid: 38 92% 50%;
+    --risk-low: 160 84% 39%;
+
+    --border: 214 32% 91%;            /* #E2E8F0 */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.875rem;               /* 14px 现代轻盈感 */
+
+    /* Sidebar — 浅色科技风 */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 16% 47%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 221 95% 95%;            /* primary-soft */
+    --sidebar-accent-foreground: 221 83% 53%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 221 83% 53%;
+
+    /* Gradients & shadows — Linear/Vercel 轻柔 */
+    --gradient-brand: linear-gradient(135deg, hsl(221 83% 53%), hsl(187 92% 43%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(216 20% 98%));
+    --gradient-hero: radial-gradient(1200px 400px at 10% -10%, hsl(221 83% 53% / 0.08), transparent 60%);
+
+    --shadow-card: 0 1px 2px hsl(222 47% 11% / 0.04), 0 4px 14px hsl(221 83% 53% / 0.06);
+    --shadow-elevated: 0 8px 24px hsl(221 83% 53% / 0.10);
+    --shadow-glow: 0 0 0 4px hsl(221 83% 53% / 0.12);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
