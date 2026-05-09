@@ -361,10 +361,21 @@ export const AIRuleAnalyzer = ({
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="例如：本月各部门人均餐费 Top 10"
+                placeholder={`例如：${examples[0]}`}
                 rows={2}
                 className="w-full resize-none rounded-md border border-input bg-background p-2 text-xs focus:outline-none focus:ring-2 focus:ring-ring/40"
               />
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {examples.map((ex) => (
+                  <button
+                    key={ex}
+                    onClick={() => setPrompt(ex)}
+                    className="rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
               <button
                 onClick={parseFromNL}
                 disabled={parsing}
