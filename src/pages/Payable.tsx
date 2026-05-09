@@ -70,8 +70,17 @@ const ANALYZER_FALLBACK: AnalyzerScenario = {
   ],
   source: "金蝶 ERP · 应付单 · 本月（共 153 笔）",
 };
+export default function Payable() {
+  return (
+    <div className="space-y-5">
+      <AIRuleAnalyzer
+        module="应付/预付"
+        examples={ANALYZER_EXAMPLES}
+        scenarios={ANALYZER_SCENARIOS}
+        fallback={ANALYZER_FALLBACK}
+      />
 
-
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
       {/* Left — input */}
       <div className="lg:col-span-4 space-y-5">
         <div className="rounded-xl border border-border bg-card shadow-[var(--shadow-card)]">
