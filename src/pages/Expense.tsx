@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Filter, Download, Sparkles, ChevronRight, X } from "lucide-react";
 import { RiskBadge, StatusBadge } from "@/components/StatusBadge";
+import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,5 +1,6 @@
 import { Upload, Sparkles, ArrowRight } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 
 const entries = [
   { acct: "应收账款 — Apex Industrial", debit: "", credit: "¥86,420.00", note: "冲减客户 Apex 应收余额" },

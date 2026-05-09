@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import { RiskBadge, StatusBadge } from "@/components/StatusBadge";
+import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 
 const tabs = [
   { l: "全部", n: 84, active: true },

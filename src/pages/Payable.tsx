@@ -1,5 +1,6 @@
 import { Search, Sparkles, Link2, Upload } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AIRuleAnalyzer, type AnalyzerScenario } from "@/components/AIRuleAnalyzer";
 
 const result = [
   { k: "客户名称", v: "Apex Industrial Co., Ltd." },
