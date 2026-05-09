@@ -84,6 +84,7 @@ export default function Payable() {
         examples={ANALYZER_EXAMPLES}
         scenarios={ANALYZER_SCENARIOS}
         fallback={ANALYZER_FALLBACK}
+        fieldOptions={ANALYZER_FIELDS}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">

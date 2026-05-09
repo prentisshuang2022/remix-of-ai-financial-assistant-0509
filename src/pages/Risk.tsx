@@ -80,6 +80,7 @@ export default function Risk() {
         examples={ANALYZER_EXAMPLES}
         scenarios={ANALYZER_SCENARIOS}
         fallback={ANALYZER_FALLBACK}
+        fieldOptions={ANALYZER_FIELDS}
       />
 
       <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 flex items-start gap-3">

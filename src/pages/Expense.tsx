@@ -222,6 +222,7 @@ export default function Expense() {
         examples={ANALYZER_EXAMPLES}
         scenarios={ANALYZER_SCENARIOS}
         fallback={ANALYZER_FALLBACK}
+        fieldOptions={ANALYZER_FIELDS}
       />
 
       {/* Filters */}
