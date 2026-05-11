@@ -7,6 +7,8 @@
 | 文档 | 受众 | 说明 |
 | --- | --- | --- |
 | [API 参考](./api-reference.md) | 研发 | 后端接口、请求/响应结构、错误码 |
+| [后端实现规范](./backend-spec.md) | 研发 | DB Schema、RLS、Edge Functions、ERP/钉钉集成、AI 编译器 |
+| [OpenAPI 契约](./openapi.yaml) | 研发 | 可直接 codegen 的接口契约 |
 | [前端组件 API](./frontend-components.md) | 研发 | 复用组件（含 `AIRuleAnalyzer`）的 Props 与扩展方式 |
 | [架构总览](./architecture.md) | 研发 | 模块划分、数据流、技术栈 |
 | [用户指南](./user-guide.md) | 业务 / 财务 | 各模块功能与操作步骤 |

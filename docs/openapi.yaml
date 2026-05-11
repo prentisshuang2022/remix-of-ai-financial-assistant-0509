@@ -1,0 +1,250 @@
+openapi: 3.1.0
+info:
+  title: 智能财务审核平台 API
+  version: 0.3.0
+  description: 详见 docs/api-reference.md 与 docs/backend-spec.md。
+servers:
+  - url: https://{project}.functions.supabase.co
+    variables: { project: { default: "your-project" } }
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    Envelope:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: integer, example: 0 }
+        message: { type: string, example: ok }
+        data: {}
+    RuleItem:
+      type: object
+      required: [id, type, field, value]
+      properties:
+        id:    { type: string }
+        type:  { type: string, enum: [time, filter, group, agg, sort, limit] }
+        field: { type: string }
+        op:    { type: string }
+        value: { type: string }
+    Expense:
+      type: object
+      properties:
+        id:           { type: string, example: BX-2025-04-1083 }
+        user:         { type: string }
+        dept:         { type: string }
+        amount:       { type: number, format: float }
+        cnt:          { type: integer }
+        rule:         { type: object, properties: { ok: {type: boolean}, hit: {type: integer} } }
+        dup:          { type: object, properties: { ok: {type: boolean}, n:   {type: integer} } }
+        risk:         { type: string, enum: [高, 中, 低] }
+        suggest:      { type: string, enum: [通过, 退回, 转人工] }
+        suggestNote:  { type: string }
+        status:       { type: string }
+    AnalyzeResult:
+      type: object
+      properties:
+        columns:     { type: array, items: { type: string } }
+        rows:        { type: array, items: { type: array, items: { oneOf: [{type: string}, {type: number}] } } }
+        source:      { type: string }
+        generatedAt: { type: string, format: date-time }
+paths:
+  /api/expense/list:
+    get:
+      summary: 报销列表
+      parameters:
+        - { in: query, name: dateFrom, schema: { type: string, format: date } }
+        - { in: query, name: dateTo,   schema: { type: string, format: date } }
+        - { in: query, name: dept,     schema: { type: string } }
+        - { in: query, name: risk,     schema: { type: string, enum: [高, 中, 低] } }
+        - { in: query, name: status,   schema: { type: string } }
+        - { in: query, name: page,     schema: { type: integer, default: 1 } }
+        - { in: query, name: pageSize, schema: { type: integer, default: 20, maximum: 200 } }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          total: { type: integer }
+                          items: { type: array, items: { $ref: "#/components/schemas/Expense" } }
+  /api/expense/{id}:
+    get:
+      summary: 报销详情
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+  /api/expense/{id}/action:
+    post:
+      summary: 报销审批动作
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:  { type: string, enum: [approve, reject, manual] }
+                comment: { type: string }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+
+  /api/payable/list:
+    get:
+      summary: 应付列表
+      parameters:
+        - { in: query, name: supplier,     schema: { type: string } }
+        - { in: query, name: agingBucket,  schema: { type: string, enum: ["0-30","31-60","61-90","90+"] } }
+        - { in: query, name: status,       schema: { type: string } }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+  /api/payable/plan:
+    post:
+      summary: 创建付款计划
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items, payDate, channel]
+              properties:
+                items:   { type: array, items: { type: string } }
+                payDate: { type: string, format: date }
+                channel: { type: string }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+
+  /api/receivable/list:
+    get:
+      summary: 应收列表
+      parameters:
+        - { in: query, name: customer,    schema: { type: string } }
+        - { in: query, name: agingBucket, schema: { type: string, enum: ["0-30","31-60","61-90","90+"] } }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+  /api/receivable/forecast:
+    get:
+      summary: 回款预测
+      parameters: [{ in: query, name: period, schema: { type: string, enum: [weekly, monthly] } }]
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+
+  /api/risk/events:
+    get:
+      summary: 风险事件
+      parameters:
+        - { in: query, name: level,  schema: { type: string, enum: [high, mid, low] } }
+        - { in: query, name: module, schema: { type: string } }
+        - { in: query, name: status, schema: { type: string } }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+  /api/risk/events/{id}/handle:
+    post:
+      summary: 处置风险事件
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:  { type: string, enum: [ack, close, escalate] }
+                comment: { type: string }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
+
+  /api/ai/parse-rules:
+    post:
+      summary: 自然语言 → 规则
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [module, prompt, fieldOptions]
+              properties:
+                module:       { type: string, enum: [expense, payable, receivable, risk] }
+                prompt:       { type: string, maxLength: 500 }
+                fieldOptions: { type: array, items: { type: string }, minItems: 1 }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          rules:  { type: array, items: { $ref: "#/components/schemas/RuleItem" } }
+                          source: { type: string }
+  /api/ai/run:
+    post:
+      summary: 规则取数
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [module, rules]
+              properties:
+                module: { type: string, enum: [expense, payable, receivable, risk] }
+                rules:  { type: array, items: { $ref: "#/components/schemas/RuleItem" }, minItems: 1, maxItems: 20 }
+                format: { type: string, enum: [table, csv], default: table }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: { $ref: "#/components/schemas/AnalyzeResult" }
+  /api/ai/export:
+    post:
+      summary: 导出 CSV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [module, rules]
+              properties:
+                module: { type: string }
+                rules:  { type: array, items: { $ref: "#/components/schemas/RuleItem" } }
+      responses:
+        "200":
+          description: csv
+          content:
+            text/csv:
+              schema: { type: string, format: binary }
+  /api/ai/notify/dingtalk:
+    post:
+      summary: 推送钉钉
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [module, title, result]
+              properties:
+                module:    { type: string }
+                title:     { type: string, maxLength: 80 }
+                result:    { $ref: "#/components/schemas/AnalyzeResult" }
+                groupId:   { type: string }
+                atMobiles: { type: array, items: { type: string } }
+      responses: { "200": { description: ok, content: { application/json: { schema: { $ref: "#/components/schemas/Envelope" } } } } }
